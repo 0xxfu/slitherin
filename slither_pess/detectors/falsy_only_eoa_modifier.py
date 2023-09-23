@@ -9,7 +9,7 @@ class OnlyEOACheck(AbstractDetector):
     Shows expression msg.sender == tx.origin
     """
 
-    ARGUMENT = 'pess-only-eoa-check' # slither will launch the detector with slither.py --detect mydetector
+    ARGUMENT = 'pess-only-eoa-check'  # slither will launch the detector with slither.py --detect mydetector
     HELP = 'msg.sender == tx.origin'
     IMPACT = DetectorClassification.MEDIUM
     CONFIDENCE = DetectorClassification.LOW
@@ -23,17 +23,20 @@ class OnlyEOACheck(AbstractDetector):
     def hasWrongEq(self, fun, params=None):
         varListMsg = []
         varListTx = []
-        for n in fun.nodes: # в первом приближении нода это строчка
-            if(n.type==NodeType.IF):
+        for n in fun.nodes:  # в первом приближении нода это строчка
+            if (n.type == NodeType.IF):
                 for var in n.solidity_variables_read:
                     is_msg = is_dependent(var, SolidityVariableComposed("msg.sender"), n.function.contract)
                     if is_msg:
                         varListMsg.append(var)
                     is_tx = is_dependent(var, SolidityVariableComposed("tx.origin"), n.function.contract)
-                    if is_tx: 
+                    if is_tx:
                         varListTx.append(var)
                 for i in range(len(varListTx)):
-                    if(str(n).__contains__(f'{varListMsg[i]} == {varListTx[i]}') or str(n).__contains__(f'{varListTx[i]} == {varListMsg[i]}')):
+                    if len(varListMsg) < len(varListTx):
+                        continue
+                    if (str(n).__contains__(f'{varListMsg[i]} == {varListTx[i]}') or str(n).__contains__(
+                            f'{varListTx[i]} == {varListMsg[i]}')):
                         return "True"
         return "False"
 
@@ -47,5 +50,5 @@ class OnlyEOACheck(AbstractDetector):
                         f.contract_declarer.name, ' ',
                         f.name, ' has a falsy EOA modifier ',
                         x, ' is set'
-                        '\n']))
+                           '\n']))
         return res

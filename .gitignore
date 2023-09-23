@@ -5,3 +5,4 @@ build/
 dist/
 .slither-pess/
 node_modules/
+.idea
